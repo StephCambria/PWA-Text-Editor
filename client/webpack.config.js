@@ -15,10 +15,17 @@ module.exports = () => {
       path: path.resolve(__dirname, "dist"),
     },
     plugins: [
+      //=================================
+      //=================================
       // TODO: Add and configure workbox plugins for a service worker and manifest file.
+      // "If you are using inject on your configuration, ensure that HtmlWebpackPlugin appears before WebpackPwaManifest in the plugins array!"
+      //=================================
+      //=================================
       new HtmlWebpackPlugin({
         template: "./index.html",
       }),
+      // https://www.npmjs.com/package/webpack-pwa-manifest
+      // ^^^^ Outlines the usage ^^^^
       new WebpackPwaManifest({
         name: "JATE",
         short_name: "JATE",
@@ -32,8 +39,8 @@ module.exports = () => {
         inject: true,
         icons: [
           {
-            src: path.resolve("src/images/logo.png"),
-            sizes: [96, 128, 192, 256, 384, 582],
+            src: path.resolve("src/images/logo.png"), // Tell the app where to find the needed images
+            sizes: [96, 128, 192, 256, 384, 582], // Multiple sizes
             destination: path.join("assets", "icons"),
           },
         ],
@@ -46,7 +53,11 @@ module.exports = () => {
 
     module: {
       rules: [
+        //=================================
+        //=================================
         // TODO: Add CSS loaders and babel to webpack.
+        //=================================
+        //=================================
         {
           test: /\.css$/i,
           use: ["style-loader", "css-loader"],
@@ -57,6 +68,8 @@ module.exports = () => {
           use: {
             loader: "babel-loader",
             options: {
+              // https://developer.chrome.com/docs/workbox/reference/workbox-webpack-plugin/#type-GenerateSWConfig
+              // Configures GenerateSW
               presets: ["@babel/preset-env"],
               plugins: [
                 "@babel/plugin-proposal-object-rest-spread",
