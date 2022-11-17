@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WebpackPwaManifest = require("webpack-pwa-manifest");
-const path = require("path");
 const { InjectManifest } = require("workbox-webpack-plugin");
+const path = require("path");
 
 module.exports = () => {
   return {
@@ -9,6 +9,9 @@ module.exports = () => {
     entry: {
       main: "./src/js/index.js",
       install: "./src/js/install.js",
+      // database: "./src/js/database.js",
+      // editor: "./src/js/editor.js",
+      // header: "./src/js/header.js",
     },
     output: {
       filename: "[name].bundle.js",
@@ -23,6 +26,7 @@ module.exports = () => {
       //=================================
       new HtmlWebpackPlugin({
         template: "./index.html",
+        title: "JATE",
       }),
       // https://www.npmjs.com/package/webpack-pwa-manifest
       // ^^^^ Outlines the usage ^^^^
@@ -31,8 +35,8 @@ module.exports = () => {
         short_name: "JATE",
         description: "Just Another Text Editor",
         display: "standalone",
-        background_color: "",
-        theme_color: "",
+        background_color: "#1e1e1e",
+        theme_color: "#1e1e1e",
         start_url: "/",
         publicPath: "/",
         fingerprints: false,
@@ -45,9 +49,20 @@ module.exports = () => {
           },
         ],
       }),
+      // "When you use injectManifest, you're responsible for wiring up precaching logic.
+      // When injectManifest examines your input service worker, it looks for a special self.__WB_MANIFEST variable and replaces it with the precache manifest.
+      // If this variable isn't present, injectManifest will throw an error."
+      // "ERROR in Can't find self.__WB_MANIFEST in your SW source."
       new InjectManifest({
-        swSrc: "./src-sw.js",
-        swDest: "service-worker.js",
+        swSrc: path.join(process.cwd(), "./src-sw.js"),
+        swDest: "client/src-sw.js",
+        exclude: [
+          /\.map$/,
+          /manifest$/,
+          /\.htaccess$/,
+          /service-worker\.js$/,
+          /sw\.js$/,
+        ],
       }),
     ],
 
@@ -66,11 +81,15 @@ module.exports = () => {
           test: /\.m?js$/,
           exclude: /node_modues/,
           use: {
+            // https://webpack.js.org/loaders/babel-loader/
+            // https://www.robinwieruch.de/webpack-babel-setup-tutorial/
+            // "By using Babel, the code which isn't supported yet, will get transpiled back to vanilla JavaScript so that every environment (e.g. browser) can interpret it."
             loader: "babel-loader",
             options: {
               // https://developer.chrome.com/docs/workbox/reference/workbox-webpack-plugin/#type-GenerateSWConfig
+              // https://www.npmjs.com/package/babel-loader
               // Configures GenerateSW
-              presets: ["@babel/preset-env"],
+              presets: ["@babel/preset-env", { targets: "defaults" }],
               plugins: [
                 "@babel/plugin-proposal-object-rest-spread",
                 "@babel/transform-runtime",
