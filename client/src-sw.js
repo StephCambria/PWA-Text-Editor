@@ -1,5 +1,5 @@
 const { offlineFallback, warmStrategyCache } = require("workbox-recipes");
-const { StaleWhileRevalidate, CacheFirst } = require("workbox-strategies");
+const { CacheFirst } = require("workbox-strategies");
 const { registerRoute } = require("workbox-routing");
 const { CacheableResponsePlugin } = require("workbox-cacheable-response");
 const { ExpirationPlugin } = require("workbox-expiration");
@@ -49,12 +49,16 @@ registerRoute(({ request }) => request.mode === "navigate", pageCache);
 // If there isn't a cached response, the Request will be fulfilled by a network request and the response will be cached so that the next request is served directly from the cache."
 
 registerRoute(
-  ({ request }) => ["style", "script", "worker"].includes(request.destination),
-  new StaleWhileRevalidate({
-    cacheName: "asset-cache",
+  ({ request }) => request.destination === "image",
+  new CacheFirst({
+    cacheName: "assets",
     plugins: [
       new CacheableResponsePlugin({
         statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxEntries: 60,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
       }),
     ],
   })
