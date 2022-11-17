@@ -1,13 +1,16 @@
 const { offlineFallback, warmStrategyCache } = require("workbox-recipes");
-const { CacheFirst } = require("workbox-strategies");
+const { StaleWhileRevalidate, CacheFirst } = require("workbox-strategies");
 const { registerRoute } = require("workbox-routing");
 const { CacheableResponsePlugin } = require("workbox-cacheable-response");
 const { ExpirationPlugin } = require("workbox-expiration");
 const { precacheAndRoute } = require("workbox-precaching/precacheAndRoute");
 
+// precacheAndRoute() is a method that takes an array of URLs to precache.
+// The self.__WB_MANIFEST is an array containing that list of URLs.
 precacheAndRoute(self.__WB_MANIFEST);
 
 const pageCache = new CacheFirst({
+  // Cache storage
   cacheName: "page-cache",
   plugins: [
     new CacheableResponsePlugin({
@@ -44,22 +47,14 @@ registerRoute(({ request }) => request.mode === "navigate", pageCache);
 // "Offline web apps will rely heavily on the cache, but for assets that are non-critical and can be gradually cached, a cache first is the best option."
 // "If there is a Response in the cache, the Request will be fulfilled using the cached response and the network will not be used at all.
 // If there isn't a cached response, the Request will be fulfilled by a network request and the response will be cached so that the next request is served directly from the cache."
+
 registerRoute(
-  // specifying what we want to cache and where it is located
-  ({ request }) => request.destination === "image",
-  new CacheFirst({
-    // "You can change the cache a strategy used by supplying a cache name.
-    // This is useful if you want to separate out your assets to help with debugging."
-    cacheName: "assets",
-    // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/#using-plugins
+  ({ request }) => ["style", "script", "worker"].includes(request.destination),
+  new StaleWhileRevalidate({
+    cacheName: "asset-cache",
     plugins: [
-      // using the plugins that were initialized at the start of this file
       new CacheableResponsePlugin({
         statuses: [0, 200],
-      }),
-      new ExpirationPlugin({
-        maxEntries: 60,
-        maxAgeSeconds: 30 * 24 * 60 * 60,
       }),
     ],
   })
