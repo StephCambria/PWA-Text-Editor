@@ -3,6 +3,9 @@ const WebpackPwaManifest = require("webpack-pwa-manifest");
 const path = require("path");
 const { InjectManifest } = require("workbox-webpack-plugin");
 
+// * TODO: Add and configure workbox plugins for a service worker and manifest file.
+// * Add CSS loaders and babel to webpack.
+
 module.exports = () => {
   return {
     mode: "development",
@@ -35,12 +38,12 @@ module.exports = () => {
         theme_color: "#1e1e1e",
         start_url: "/",
         publicPath: "/",
-        fingerprints: true,
+        fingerprints: false,
         inject: true,
         icons: [
           {
             src: path.resolve("src/images/logo.png"), // Tell the app where to find the needed images
-            sizes: [96, 128, 192, 256, 384, 582], // Multiple sizes
+            sizes: [96, 128, 192, 256, 384, 512], // Multiple sizes
             destination: path.join("assets", "icons"),
           },
         ],
@@ -50,9 +53,8 @@ module.exports = () => {
       // If this variable isn't present, injectManifest will throw an error."
       // "ERROR in Can't find self.__WB_MANIFEST in your SW source."
       new InjectManifest({
-        // InjectManifest injects our custom service worker
         swSrc: "./src-sw.js",
-        swDest: "src-sw.js",
+        swDest: "service-worker.js",
       }),
     ],
 
@@ -68,23 +70,19 @@ module.exports = () => {
           use: ["style-loader", "css-loader"],
         },
         {
-          test: /\.(png|svg|jpg|jpeg|gif|ico)$/i,
-          type: "asset/resource", //files destination
-        },
-        {
           test: /\.m?js$/,
-          exclude: /node_modues/,
+          exclude: /node_modules/,
           use: {
             // https://webpack.js.org/loaders/babel-loader/
             // https://www.robinwieruch.de/webpack-babel-setup-tutorial/
             // "By using Babel, the code which isn't supported yet, will get transpiled back to vanilla JavaScript so that every environment (e.g. browser) can interpret it."
-            loader: "babel-loader", // converts syntax
+            loader: "babel-loader",
             options: {
               // https://developer.chrome.com/docs/workbox/reference/workbox-webpack-plugin/#type-GenerateSWConfig
               // https://www.npmjs.com/package/babel-loader
               // Configures GenerateSW
               presets: ["@babel/preset-env"],
-              "plugins": [
+              plugins: [
                 "@babel/plugin-proposal-object-rest-spread",
                 "@babel/transform-runtime",
               ],
