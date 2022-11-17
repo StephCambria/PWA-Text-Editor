@@ -23,7 +23,6 @@ module.exports = () => {
       //=================================
       new HtmlWebpackPlugin({
         template: "./index.html",
-        title: "JATE",
       }),
       // https://www.npmjs.com/package/webpack-pwa-manifest
       // ^^^^ Outlines the usage ^^^^
@@ -36,7 +35,7 @@ module.exports = () => {
         theme_color: "#1e1e1e",
         start_url: "/",
         publicPath: "/",
-        fingerprints: false,
+        fingerprints: true,
         inject: true,
         icons: [
           {
@@ -70,7 +69,7 @@ module.exports = () => {
         },
         {
           test: /\.(png|svg|jpg|jpeg|gif|ico)$/i,
-          type: "src/images", //files destination
+          type: "asset/resource", //files destination
         },
         {
           test: /\.m?js$/,
@@ -85,7 +84,7 @@ module.exports = () => {
               // https://www.npmjs.com/package/babel-loader
               // Configures GenerateSW
               presets: ["@babel/preset-env"],
-              plugins: [
+              "plugins": [
                 "@babel/plugin-proposal-object-rest-spread",
                 "@babel/transform-runtime",
               ],
